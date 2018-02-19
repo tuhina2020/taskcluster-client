@@ -80,8 +80,29 @@ var insertTask = function(namespace, input, options) {
   });
 };
 
+var getNameSpace = function({namespace, limit, continuation, Namespace}, callback) {
+  return Namespace.query({
+    parent: namespace
+  }, {
+    limit,
+    continuation,
+  }).then(function(data) {
+    var retval = {};
+    retval.namespaces = data.entries.map(function(ns) {
+      return ns.json();
+    });
+    if (data.continuation) {
+      retval.continuationToken = data.continuation;
+    }
+    return callback(null, retval);
+  });
+};
+
 // Export insertTask
 exports.insertTask = insertTask;
 
 /** Regular expression for valid namespaces */
 exports.namespaceFormat = /^([a-zA-Z0-9_!~*'()%-]+\.)*[a-zA-Z0-9_!~*'()%-]+$/;
+
+// Export method to get namespaces
+exports.getNameSpace = getNameSpace;
